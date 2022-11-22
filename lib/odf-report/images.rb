@@ -15,20 +15,26 @@ module ODFReport
           entry = original_zip_file.find_entry(old_file)
           unless entry.nil?
             original_image = Magick::Image.from_blob(entry.get_input_stream.read)[0]
-            new_image = Magick::Image.from_blob(replaced_image_content)[0]
-            original_image_ratio = original_image.base_columns.to_f / original_image.base_rows.to_f
-            new_image_ratio = new_image.base_columns.to_f / new_image.base_rows.to_f
-            if original_image_ratio != new_image_ratio
-              width, height = if original_image_ratio > new_image_ratio
-                [new_image.base_columns.to_f * original_image_ratio / new_image_ratio, new_image.base_rows.to_f]
-              else
-                [new_image.base_columns.to_f, new_image.base_rows.to_f * new_image_ratio / original_image_ratio]
-              end
+            original_width = original_image.base_columns.to_f
+            original_height = original_image.base_rows.to_f
+            original_image_ratio = original_width / original_height
 
+            new_image = Magick::Image.from_blob(replaced_image_content)[0]
+            new_image_width = new_image.base_columns.to_f
+            new_image_height = new_image.base_rows.to_f
+            new_image_ratio = new_image_width / new_image_height
+            if original_image_ratio != new_image_ratio
+              puts "IN DOCUMENT: #{original_width}, #{original_height}"
               puts "ORIGINAL: #{new_image.base_columns.to_f}, #{new_image.base_rows.to_f}"
-              puts "NEW: #{width}, #{height}"
-              new_image.resize_to_fit!(width, height)
-              empty_img = ::Magick::Image.new(width, height) { |img| img.background_color = 'rgba(255,255,255,0)' }
+              puts "NEW: #{original_width} #{original_height}"
+              # First fit (scale) the image to the destination size.
+              # The image might be smaller than the requested size.
+              new_image.resize_to_fit!(original_width, original_height)
+
+              # Create a new image with the requested dimensions.
+              # Make it a white background
+              # Compose in the center the resized replacement image (created from above)
+              empty_img = ::Magick::Image.new(original_width, original_height) { |img| img.background_color = 'rgba(255,255,255,0)' }
               filled = empty_img.matte_floodfill(1, 1)
               filled.composite!(new_image, Magick::CenterGravity, ::Magick::OverCompositeOp)
               filled.format = original_image.format
