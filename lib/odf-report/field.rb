@@ -22,9 +22,11 @@ module ODFReport
 
       txt = content.inner_html
       val = get_value(data_item)
-      txt.gsub!(to_placeholder, sanitize(val))
-
-      content.inner_html = txt
+      if txt.gsub!(to_placeholder, sanitize(val))
+        # Only replace when necessary (eg anything changed)
+        # as this is rather (memory) expensive to do
+        content.inner_html = txt
+      end
     end
 
     def get_value(data_item = nil)
