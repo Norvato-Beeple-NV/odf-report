@@ -3,7 +3,7 @@ module ODFReport
   class Section
     include Images, Nested
 
-    def initialize(opts)
+    def initialize(opts, report)
       @name             = opts[:name]
       @collection_field = opts[:collection_field]
       @collection       = opts[:collection]
@@ -15,6 +15,7 @@ module ODFReport
       @poorman_sections = []
       @images = []
       @image_name_additions = {}
+      @report = report
     end
 
     def replace!(doc, file, original_zip_file, row = nil)

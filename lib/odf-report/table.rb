@@ -3,7 +3,7 @@ module ODFReport
   class Table
     include Images, Nested
 
-    def initialize(opts)
+    def initialize(opts, report)
       @name             = opts[:name]
       @collection_field = opts[:collection_field]
       @collection       = opts[:collection]
@@ -18,6 +18,8 @@ module ODFReport
       @template_rows = []
       @header           = opts[:header] || false
       @skip_if_empty    = opts[:skip_if_empty] || false
+
+      @report = report
     end
 
     def replace!(doc, file, original_zip_file, row = nil)

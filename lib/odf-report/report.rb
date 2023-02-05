@@ -23,7 +23,7 @@ module ODFReport
 
     def add_field(field_tag, value='')
       opts = {:name => field_tag, :value => value}
-      field = Field.new(opts)
+      field = Field.new(opts, self)
       @fields << field
     end
 
@@ -35,13 +35,13 @@ module ODFReport
 
     def add_link(field_tag, value='')
       opts = {:name => field_tag, :value => value}
-      link = Link.new(opts)
+      link = Link.new(opts, self)
       @links << link
     end
 
     def add_text(field_tag, value='')
       opts = {:name => field_tag, :value => value}
-      text = Text.new(opts)
+      text = Text.new(opts, self)
       @texts << text
     end
 
@@ -54,7 +54,7 @@ module ODFReport
 
     def add_table(table_name, collection, opts={})
       opts.merge!(:name => table_name, :collection => collection)
-      tab = Table.new(opts)
+      tab = Table.new(opts, self)
       @tables << tab
 
       yield(tab)
@@ -62,7 +62,7 @@ module ODFReport
 
     def add_section(section_name, collection, opts={})
       opts.merge!(:name => section_name, :collection => collection)
-      sec = Section.new(opts)
+      sec = Section.new(opts, self)
       @sections << sec
 
       yield(sec)
@@ -70,10 +70,16 @@ module ODFReport
 
     def add_poorman_section(section_name, collection, opts={})
       opts.merge!(:name => section_name, :collection => collection)
-      sec = PoormanSection.new(opts)
+      sec = PoormanSection.new(opts, self)
       @poorman_sections << sec
 
       yield(sec)
+    end
+
+    def uses_field?(field_name)
+      return true if @used_field_names.nil? # Just to be sure
+
+      @used_field_names.include?(field_name)
     end
 
     def generate(dest = nil)
@@ -83,6 +89,12 @@ module ODFReport
         file.update_files('content.xml', 'styles.xml') do |txt, original_zip_file|
 
           parse_document(txt) do |doc|
+
+            @used_field_names ||= begin
+              doc.inner_html.scan(/\{\{([A-Z0-9_]+)\}\}/).map do |match|
+                match[0]
+              end
+            end
 
             @sections.each { |s| @image_name_additions.merge! s.replace!(doc, file, original_zip_file) }
 

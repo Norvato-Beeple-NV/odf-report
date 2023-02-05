@@ -6,9 +6,10 @@ module ODFReport
 
     attr_reader :name
 
-    def initialize(opts, &block)
+    def initialize(opts, report, &block)
       @name = opts[:name]
       @data_field = opts[:data_field]
+      @report = report
 
       return if @value = opts[:value]
       @block = if block_given?
@@ -19,6 +20,7 @@ module ODFReport
     end
 
     def replace!(content, data_item = nil)
+      return if @report && !@report.uses_field?(@name.to_s.upcase)
 
       txt = content.inner_html
       val = get_value(data_item)

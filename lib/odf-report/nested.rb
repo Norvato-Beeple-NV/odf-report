@@ -11,7 +11,7 @@ module ODFReport
 
     def add_field(name, data_field=nil, &block)
       opts = {:name => name, :data_field => data_field}
-      field = Field.new(opts, &block)
+      field = Field.new(opts, @report, &block)
       @fields << field
 
     end
@@ -19,14 +19,14 @@ module ODFReport
 
     def add_text(name, data_field=nil, &block)
       opts = {:name => name, :data_field => data_field}
-      field = Text.new(opts, &block)
+      field = Text.new(opts, @report, &block)
       @texts << field
 
     end
 
     def add_table(table_name, collection_field, opts={})
       opts.merge!(:name => table_name, :collection_field => collection_field)
-      tab = Table.new(opts)
+      tab = Table.new(opts, @report)
       @tables << tab
 
       yield(tab)
@@ -34,7 +34,7 @@ module ODFReport
 
     def add_section(section_name, collection_field, opts={})
       opts.merge!(:name => section_name, :collection_field => collection_field)
-      sec = Section.new(opts)
+      sec = Section.new(opts, @report)
       @sections << sec
 
       yield(sec)
@@ -42,7 +42,7 @@ module ODFReport
 
     def add_poorman_section(section_name, collection_field, opts={})
       opts.merge!(:name => section_name, :collection_field => collection_field)
-      sec = PoormanSection.new(opts)
+      sec = PoormanSection.new(opts, @report)
       @poorman_sections << sec
 
       yield(sec)
