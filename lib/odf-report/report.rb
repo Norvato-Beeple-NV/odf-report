@@ -87,10 +87,9 @@ module ODFReport
       @file.update_content do |file|
 
         file.update_files('content.xml', 'styles.xml') do |txt, original_zip_file|
-
           parse_document(txt) do |doc|
 
-            @used_field_names ||= begin
+            @used_field_names = begin
               doc.inner_html.scan(/\{\{([A-Z0-9_]+)\}\}/).map do |match|
                 match[0]
               end
