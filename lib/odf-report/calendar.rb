@@ -3,6 +3,7 @@ module ODFReport
     include Nested
 
     VALID_PERIODS = %w{week month}
+    SUPPORTED_LOCALES = ['en', 'fr', 'nl', 'de', 'es', 'zh']
 
     def initialize(opts)
       @period = opts[:period] || 'month'
@@ -11,7 +12,10 @@ module ODFReport
       @template = nil
       @fields = []
       @collection = opts[:collection] || []
-      I18n.locale = opts[:locale] || 'en'
+
+      requested_locale = opts[:locale] || 'en'
+      requested_locale = 'en' unless requested_locale.in?(SUPPORTED_LOCALES)
+      I18n.locale = requested_locale
     end
 
     def replace!(content)
